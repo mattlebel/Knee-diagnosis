@@ -1,0 +1,989 @@
+<title>Runner Knee Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: two-up "lab bench" — runner + knee map side by side, then symptoms + matches; one column on phones. */
+:root {
+  --bg: #F2F4F8;
+  --surface: #FFFFFF;
+  --ink: #14213D;
+  --muted: #5A6781;
+  --line: #D6DCE6;
+  --accent: #2546C9;
+  --accent-soft: #E4E9FB;
+  --pain: #D91F5A;
+  --pain-soft: #FBE4EC;
+  --ok: #23845A;
+  --warn: #A76A00;
+  --warn-soft: #FFF3D9;
+  --skin: #E3E8F1;
+  --skin-edge: #AEB9CC;
+  --bone: #FAFBFD;
+  --bone-edge: #C3CBD9;
+  --tendon: #7F8FAE;
+  --band: rgba(37, 70, 201, .16);
+  --band-edge: rgba(37, 70, 201, .45);
+  --far: #A8B3C7;
+  --track: #E7EAF1;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1322; --surface: #151D30; --ink: #E6EBF5; --muted: #98A4BD; --line: #28334A;
+    --accent: #8099FF; --accent-soft: #1D2850; --pain: #FF5C8C; --pain-soft: #3B1626;
+    --ok: #5CD39A; --warn: #F2B544; --warn-soft: #33270C;
+    --skin: #1E283D; --skin-edge: #3A4865; --bone: #26314A; --bone-edge: #46557A; --tendon: #8797B8;
+    --band: rgba(128, 153, 255, .18); --band-edge: rgba(128, 153, 255, .55); --far: #4A5878; --track: #1A2337;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1322; --surface: #151D30; --ink: #E6EBF5; --muted: #98A4BD; --line: #28334A;
+  --accent: #8099FF; --accent-soft: #1D2850; --pain: #FF5C8C; --pain-soft: #3B1626;
+  --ok: #5CD39A; --warn: #F2B544; --warn-soft: #33270C;
+  --skin: #1E283D; --skin-edge: #3A4865; --bone: #26314A; --bone-edge: #46557A; --tendon: #8797B8;
+  --band: rgba(128, 153, 255, .18); --band-edge: rgba(128, 153, 255, .55); --far: #4A5878; --track: #1A2337;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 20px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: .01em; }
+h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); text-transform: uppercase; }
+h2 { font-size: 1.55rem; text-transform: uppercase; }
+h3 { font-size: 1.25rem; }
+p { margin: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--pain); }
+.lede { color: var(--muted); max-width: 62ch; font-size: 1.05rem; }
+header { display: grid; gap: 10px; }
+
+.grid2 { display: grid; gap: 20px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .grid2 { grid-template-columns: 1fr 1fr; align-items: start; } .grid2.results { grid-template-columns: 5fr 7fr; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.card-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; justify-content: space-between; }
+.step { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); letter-spacing: .08em; }
+.hint { color: var(--muted); font-size: .9rem; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 14px; font-weight: 600; font-size: .92rem; display: inline-flex; align-items: center; gap: 8px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--pain); border-color: var(--pain); color: #fff; }
+.btn.primary.on { background: var(--surface); color: var(--pain); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--accent); padding-inline: 6px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Runner */
+.runner-box { position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); border: 1px solid var(--line); }
+#runner { display: block; width: 100%; height: 250px; touch-action: manipulation; cursor: pointer; }
+.speed { position: absolute; top: 8px; left: 10px; font-family: var(--font-mono); font-size: .7rem; color: var(--muted); letter-spacing: .06em; }
+.phase-now { position: absolute; top: 8px; right: 10px; font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; text-transform: uppercase; }
+.phase-now.hurts { color: var(--pain); }
+#scrub { width: 100%; accent-color: var(--accent); margin: 0; }
+.phases { display: flex; gap: 3px; }
+.phase-seg { flex-grow: var(--w); flex-basis: 0; min-width: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 2px 5px; font-size: .72rem; line-height: 1.15; text-align: center; color: var(--muted); position: relative; overflow: hidden; text-overflow: ellipsis; }
+.phase-seg.current { border-color: var(--accent); color: var(--ink); }
+.phase-seg.marked { background: var(--pain-soft); border-color: var(--pain); color: var(--pain); font-weight: 700; }
+.phase-scale { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: .68rem; color: var(--muted); }
+.phase-scale span:nth-child(2) { margin-left: 18%; }
+
+/* Knee map */
+.tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 3px; flex-wrap: wrap; }
+.tab { border: 0; background: transparent; border-radius: 999px; padding: 6px 12px; font-weight: 600; font-size: .88rem; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.tab .badge { background: var(--pain); color: #fff; border-radius: 999px; font-size: .7rem; min-width: 18px; padding: 0 5px; line-height: 18px; text-align: center; }
+.knee-box { position: relative; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); display: flex; justify-content: center; }
+.knee-box.flash { animation: flash 1s ease; }
+@keyframes flash { 0% { box-shadow: 0 0 0 0 var(--pain); } 40% { box-shadow: 0 0 0 6px var(--pain-soft); } 100% { box-shadow: 0 0 0 0 transparent; } }
+#knee { width: 100%; max-width: 360px; height: auto; max-height: 460px; display: block; touch-action: manipulation; cursor: crosshair; }
+#knee .skin { fill: var(--skin); stroke: var(--skin-edge); stroke-width: 1.5; }
+#knee .bone { fill: var(--bone); stroke: var(--bone-edge); stroke-width: 1.2; }
+#knee .band { fill: var(--band); stroke: var(--band-edge); stroke-width: 1; }
+#knee .muscle { fill: var(--band); stroke: none; opacity: .6; }
+#knee .tendon { fill: none; stroke: var(--tendon); stroke-width: 5; stroke-linecap: round; opacity: .75; }
+#knee .tendon.thin { stroke-width: 3; }
+#knee .tendon-fill { fill: var(--tendon); opacity: .45; }
+#knee .lig { fill: none; stroke: var(--tendon); stroke-width: 6; stroke-linecap: round; opacity: .9; }
+#knee .joint { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; fill: none; }
+#knee .orient { fill: var(--muted); font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; }
+#knee .zone { fill: transparent; stroke: none; }
+#knee.show-zones .zone { stroke: var(--accent); stroke-dasharray: 3 3; stroke-width: 1; fill: var(--accent-soft); fill-opacity: .35; }
+#knee .zone.hot { fill: var(--accent-soft); fill-opacity: .7; stroke: var(--accent); stroke-dasharray: none; }
+#knee .pin-ring { fill: none; stroke: var(--pain); stroke-width: 2; opacity: .5; }
+#knee .pin { fill: var(--pain); stroke: var(--surface); stroke-width: 2; cursor: pointer; }
+#knee .pin-n { fill: #fff; font-family: var(--font-mono); font-size: 10px; text-anchor: middle; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) { #knee .pin-ring { animation: ring 1.8s ease-out infinite; transform-box: fill-box; transform-origin: center; } }
+@keyframes ring { from { transform: scale(.6); opacity: .8; } to { transform: scale(1.6); opacity: 0; } }
+.readout { font-weight: 600; min-height: 1.5em; }
+.readout small { font-weight: 400; color: var(--muted); }
+.pins { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pins li { display: flex; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 6px 10px; }
+.pins .n { background: var(--pain); color: #fff; border-radius: 999px; width: 22px; height: 22px; display: grid; place-items: center; font-family: var(--font-mono); font-size: .75rem; flex: none; }
+.pins .txt { flex: 1; min-width: 0; font-size: .92rem; }
+.pins .txt small { color: var(--muted); display: block; }
+.x { border: 0; background: transparent; color: var(--muted); font-size: 1.2rem; line-height: 1; padding: 4px 8px; border-radius: 8px; }
+.x:hover { color: var(--pain); }
+.note { font-size: .85rem; color: var(--muted); background: var(--bg); border-radius: 8px; padding: 8px 10px; border: 1px dashed var(--line); }
+
+/* Symptoms */
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+legend { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 0; margin-bottom: 8px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-size: .9rem; }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+:root[data-theme="dark"] .chip[aria-pressed="true"] { color: #0D1322; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .chip[aria-pressed="true"] { color: #0D1322; } }
+.km { display: grid; gap: 4px; padding: 10px 12px; background: var(--bg); border-radius: 10px; }
+.km input { width: 100%; accent-color: var(--accent); }
+.km-val { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; }
+.km-marks { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: .68rem; color: var(--muted); }
+
+/* Results */
+.result { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.result summary { list-style: none; padding: 12px 14px; display: grid; gap: 8px; cursor: pointer; }
+.result summary::-webkit-details-marker { display: none; }
+.r-top { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+.r-name { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; line-height: 1.1; }
+.pill { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+.pill.strong { background: var(--pain); color: #fff; }
+.pill.possible { background: var(--pain-soft); color: var(--pain); }
+.pill.less { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.bar { height: 6px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--pain); border-radius: 999px; transition: width .4s ease; }
+.why { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px 12px; flex-wrap: wrap; font-size: .84rem; }
+.why li.good { color: var(--ok); }
+.why li.bad { color: var(--warn); }
+.why li.good::before { content: "+ "; font-family: var(--font-mono); }
+.why li.bad::before { content: "– "; font-family: var(--font-mono); }
+.r-body { padding: 0 14px 16px; display: grid; gap: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.r-body h4 { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; font-weight: 500; }
+.r-body p, .r-body li { max-width: 66ch; }
+.r-body ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.ex-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.ex { background: var(--bg); border-radius: 10px; padding: 10px 12px; display: grid; gap: 4px; align-content: start; }
+.ex b { font-weight: 700; }
+.ex .dose { font-family: var(--font-mono); font-size: .76rem; color: var(--accent); }
+.ex p { font-size: .88rem; color: var(--muted); }
+.empty { text-align: center; color: var(--muted); padding: 30px 10px; border: 1px dashed var(--line); border-radius: 12px; }
+.flag { background: var(--warn-soft); border: 1px solid var(--warn); color: var(--ink); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; }
+.flag b { color: var(--warn); }
+.guide { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.guide > div { display: grid; gap: 6px; align-content: start; }
+.guide ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; font-size: .94rem; }
+.foot { color: var(--muted); font-size: .85rem; max-width: 80ch; }
+#copyOut { width: 100%; min-height: 140px; font-family: var(--font-mono); font-size: .8rem; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.toast { color: var(--ok); font-weight: 600; font-size: .9rem; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Right knee · after the Berlin Marathon</div>
+    <h1>Runner Knee Map</h1>
+    <p class="lede">Mark when in the stride it hurts and tap where on the knee you feel it. The map ranks the usual running knee problems that fit, with self-checks and strengthening work to take to a physio.</p>
+  </header>
+
+  <div class="grid2">
+    <section class="card" aria-labelledby="h-stride">
+      <div class="card-head">
+        <h2 id="h-stride">When in the stride</h2>
+        <span class="step">STEP 1 OF 3</span>
+      </div>
+      <div class="runner-box">
+        <canvas id="runner" aria-label="Animated runner seen from the right side. The right leg is highlighted."></canvas>
+        <span class="speed">⅓ SPEED · ~170 STEPS/MIN</span>
+        <span class="phase-now" id="phaseNow">Foot strike</span>
+      </div>
+      <input type="range" id="scrub" min="0" max="999" value="0" aria-label="Position in the right leg's stride cycle">
+      <div class="phases" id="phases"></div>
+      <div class="phase-scale"><span>0% contact</span><span>40% toe-off</span><span>100%</span></div>
+      <div class="row">
+        <button class="btn" id="playBtn" type="button">Pause</button>
+        <button class="btn primary" id="hurtBtn" type="button">It hurts here</button>
+      </div>
+      <p class="hint">Pause or drag the slider to the moment the pain bites, then tap <b>It hurts here</b>. Tap the glowing right knee to jump to the knee map.</p>
+    </section>
+
+    <section class="card" id="kneeCard" aria-labelledby="h-where">
+      <div class="card-head">
+        <h2 id="h-where">Where on the knee</h2>
+        <span class="step">STEP 2 OF 3</span>
+      </div>
+      <div class="row" style="justify-content: space-between;">
+        <div class="tabs" role="tablist" id="tabs"></div>
+        <label class="row hint" style="gap:6px; cursor:pointer;"><input type="checkbox" id="showZones"> Show areas</label>
+      </div>
+      <div class="knee-box" id="kneeBox">
+        <svg id="knee" viewBox="0 0 300 420" role="img" aria-label="Right knee diagram. Tap to drop a pain pin."></svg>
+      </div>
+      <div class="readout" id="readout">Tap the knee to drop a pin</div>
+      <ul class="pins" id="pins"></ul>
+      <p class="note" id="starterNote">Pin 1 is a starting point from your description (outside of the right knee). Move it by removing it and tapping the exact spot. Press around with your fingers first to find the most tender point.</p>
+    </section>
+  </div>
+
+  <div class="grid2 results">
+    <section class="card" aria-labelledby="h-feel">
+      <div class="card-head">
+        <h2 id="h-feel">How it feels</h2>
+        <span class="step">STEP 3 OF 3</span>
+      </div>
+      <div id="feats" style="display:grid; gap:18px;"></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-match">
+      <div class="card-head">
+        <h2 id="h-match">Likely matches</h2>
+        <button class="btn ghost" id="copyBtn" type="button">Copy summary for a physio</button>
+      </div>
+      <div id="flags" style="display:grid; gap:8px;"></div>
+      <div id="results" style="display:grid; gap:10px;"></div>
+      <div id="copyWrap" hidden style="display:grid; gap:6px;">
+        <span class="toast" id="copyToast"></span>
+        <textarea id="copyOut" readonly aria-label="Summary text"></textarea>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" aria-labelledby="h-guide">
+    <h2 id="h-guide">Running while it settles</h2>
+    <div class="guide">
+      <div>
+        <h3>Pain-monitoring rule</h3>
+        <ul>
+          <li>Pain up to <b>3 / 10</b> during exercise or a run is acceptable.</li>
+          <li>It should settle within <b>24 hours</b> and not be worse the next morning.</li>
+          <li>If it builds week to week, drop the load back a step.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Strength routine</h3>
+        <ul>
+          <li>Do the exercises 3–4 times a week, both legs, sore side first.</li>
+          <li>Slow and controlled: about 3 seconds on the lowering part.</li>
+          <li>Add load or reps when the last set feels easy for two sessions in a row.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>See a physio or doctor if</h3>
+        <ul>
+          <li>The knee locks, gives way, or swells quickly.</li>
+          <li>You can't put weight on it, or pain wakes you at night.</li>
+          <li>Numbness, tingling or a weak, slapping foot.</li>
+          <li>Calf swelling, warmth or redness, or fever.</li>
+          <li>No clear improvement after 2–3 weeks.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="foot">This is a self-assessment aid built on common clinical patterns, not a diagnosis. Several of these conditions overlap, and a hands-on exam by a sports physio is the fastest way to confirm what's going on. Your marks are saved only in this browser.</p>
+  </section>
+</div>
+
+<script>
+(() => {
+/* ---------------- Data ---------------- */
+const PHASES = [
+  { id: 'contact',     label: 'Foot strike',          short: 'Strike',    a: 0,    b: .08 },
+  { id: 'loading',     label: 'Loading / midstance',  short: 'Load',      a: .08,  b: .25 },
+  { id: 'propulsion',  label: 'Push-off',             short: 'Push-off',  a: .25,  b: .40 },
+  { id: 'early_swing', label: 'Early swing',          short: 'Heel kick', a: .40,  b: .60 },
+  { id: 'mid_swing',   label: 'Knee drive',           short: 'Knee drive',a: .60,  b: .80 },
+  { id: 'late_swing',  label: 'Late swing (reaching)',short: 'Reach',     a: .80,  b: 1 },
+];
+
+const ZL = {
+  itb_distal: 'Outer bony bump above the joint (ITB over the lateral epicondyle)',
+  itb_thigh: 'IT band on the lower outer thigh',
+  vl: 'Outer quad (vastus lateralis)',
+  gerdy: "Gerdy's tubercle, where the ITB attaches on the shin",
+  lat_jl: 'Outer joint line',
+  lcl: 'Lateral collateral ligament (LCL)',
+  post_lat: 'Back-outer corner (popliteus tendon)',
+  biceps: 'Outer hamstring tendon (biceps femoris)',
+  fib_head: 'Head of the fibula (bony knob below the outer knee)',
+  below_fib: 'Just below the fibular head, upper outer shin',
+  lat_patella: 'Outer edge of the kneecap',
+  med_patella: 'Inner edge of the kneecap',
+  patella: 'Kneecap',
+  pat_tendon: 'Patellar tendon, below the kneecap',
+  quad_tendon: 'Quad tendon, just above the kneecap',
+  vmo: 'Inner quad (VMO)',
+  med_jl: 'Inner joint line',
+  mcl: 'Medial collateral ligament (MCL)',
+  med_epi: 'Inner bony bump of the thigh bone',
+  pes: 'Pes anserine, inner shin below the joint',
+  med_ham: 'Inner hamstring tendons',
+  fossa: 'Back of the knee (popliteal fossa)',
+  popliteus: 'Popliteus, just below the back-of-knee crease',
+  gastroc_l: 'Top of the outer calf',
+  gastroc_m: 'Top of the inner calf',
+};
+
+const mirror = zs => zs.map(z => ({ ...z, x: 300 - z.x }));
+const ZONES = {
+  lateral: [
+    { id: 'itb_distal', x: 165, y: 186, r: 24 },
+    { id: 'itb_thigh', x: 176, y: 110, r: 28 },
+    { id: 'vl', x: 210, y: 92, r: 22 },
+    { id: 'gerdy', x: 206, y: 246, r: 13 },
+    { id: 'lat_jl', x: 184, y: 218, r: 14 },
+    { id: 'lcl', x: 142, y: 220, r: 14 },
+    { id: 'post_lat', x: 108, y: 216, r: 15 },
+    { id: 'biceps', x: 100, y: 158, r: 22 },
+    { id: 'fib_head', x: 122, y: 252, r: 12 },
+    { id: 'below_fib', x: 124, y: 298, r: 22 },
+    { id: 'lat_patella', x: 230, y: 196, r: 15 },
+    { id: 'pat_tendon', x: 224, y: 246, r: 11 },
+  ],
+  front: [
+    { id: 'patella', x: 150, y: 192, r: 20 },
+    { id: 'lat_patella', x: 124, y: 194, r: 11 },
+    { id: 'med_patella', x: 176, y: 194, r: 11 },
+    { id: 'quad_tendon', x: 150, y: 150, r: 17 },
+    { id: 'vl', x: 104, y: 118, r: 24 },
+    { id: 'vmo', x: 192, y: 150, r: 18 },
+    { id: 'itb_distal', x: 102, y: 196, r: 13 },
+    { id: 'lat_jl', x: 110, y: 229, r: 12 },
+    { id: 'med_jl', x: 190, y: 229, r: 12 },
+    { id: 'pat_tendon', x: 150, y: 244, r: 13 },
+    { id: 'gerdy', x: 118, y: 256, r: 11 },
+    { id: 'pes', x: 182, y: 274, r: 15 },
+  ],
+  back: [
+    { id: 'fossa', x: 150, y: 214, r: 22 },
+    { id: 'biceps', x: 198, y: 172, r: 18 },
+    { id: 'med_ham', x: 104, y: 172, r: 18 },
+    { id: 'popliteus', x: 158, y: 252, r: 14 },
+    { id: 'post_lat', x: 196, y: 228, r: 13 },
+    { id: 'fib_head', x: 202, y: 262, r: 11 },
+    { id: 'gastroc_l', x: 178, y: 300, r: 20 },
+    { id: 'gastroc_m', x: 122, y: 300, r: 20 },
+  ],
+  medial: mirror([
+    { id: 'med_patella', x: 230, y: 196, r: 15 },
+    { id: 'vmo', x: 206, y: 150, r: 22 },
+    { id: 'med_epi', x: 162, y: 186, r: 14 },
+    { id: 'med_jl', x: 184, y: 218, r: 14 },
+    { id: 'mcl', x: 168, y: 246, r: 16 },
+    { id: 'pes', x: 186, y: 276, r: 15 },
+    { id: 'med_ham', x: 100, y: 150, r: 24 },
+    { id: 'pat_tendon', x: 224, y: 246, r: 11 },
+  ]),
+};
+const VIEWS = [
+  { id: 'lateral', label: 'Outside' },
+  { id: 'front', label: 'Front' },
+  { id: 'back', label: 'Back' },
+  { id: 'medial', label: 'Inside' },
+];
+const VIEW_NAME = { lateral: 'outside view', front: 'front view', back: 'back view', medial: 'inside view' };
+
+const FEATS = [
+  { group: 'What the pain feels like', items: [
+    ['sharp', 'Sharp / stabbing'], ['ache', 'Dull ache'], ['burning', 'Burning'], ['tight', 'Tight / pulling'], ['tingling', 'Tingling or numb'] ] },
+  { group: 'What makes it worse', items: [
+    ['downhill', 'Running downhill'], ['uphill', 'Running uphill'], ['stairs_down', 'Going down stairs'], ['stairs_up', 'Going up stairs'],
+    ['sitting', 'Sitting with knee bent'], ['squat', 'Deep squat or kneeling'], ['twisting', 'Twisting or pivoting'],
+    ['fast_pace', 'Faster running / strides'], ['after_distance', 'Starts at a predictable distance'], ['rest_pain', 'At rest or at night'] ] },
+  { group: 'What you notice', items: [
+    ['swelling', 'Swelling'], ['clicking', 'Clicking or catching'], ['locking', 'Knee locks or gets stuck'], ['giving_way', 'Gives way'],
+    ['tender', 'One spot sore to press'], ['morning_stiff', 'Stiff at first, eases once warm'] ] },
+  { group: 'How it started', radio: true, items: [
+    ['gradual', 'Built up during the run'], ['sudden', 'Sudden: misstep, twist or pop'] ] },
+];
+const FEAT_TXT = {
+  sharp: 'sharp pain', ache: 'dull ache', burning: 'burning', tight: 'tight or pulling', tingling: 'tingling or numbness',
+  downhill: 'worse downhill', uphill: 'worse uphill', stairs_down: 'worse down stairs', stairs_up: 'worse up stairs',
+  sitting: 'worse sitting', squat: 'worse squatting', twisting: 'worse twisting', fast_pace: 'worse at faster pace',
+  after_distance: 'starts at a set distance', rest_pain: 'pain at rest', swelling: 'swelling', clicking: 'clicking',
+  locking: 'locking', giving_way: 'giving way', tender: 'tender spot', morning_stiff: 'stiff, then warms up',
+  gradual: 'gradual onset', sudden: 'sudden onset',
+};
+
+const EX = {
+  side_hip_abd: ['Side-lying hip abduction', '3 × 12–15', 'Lie on the good side, bottom knee bent. Lift the top leg slightly behind you with toes pointing forward. 2 s up, 3 s down. Keep the pelvis from rolling back.'],
+  clamshell: ['Banded clamshell', '3 × 15', 'Side-lying, knees bent 45°, band above the knees. Open the top knee without rolling the pelvis back.'],
+  side_plank: ['Side plank', '3 × 20–40 s', 'Start from knees, progress to feet. Body in a straight line, hips high. Add a top-leg lift once easy.'],
+  sl_bridge: ['Single-leg glute bridge', '3 × 10 each', 'Other knee hugged to chest. Drive through the heel, squeeze the glute, hold 2 s at the top.'],
+  hip_hike: ['Hip hike on a step', '3 × 12', 'Stand on the sore leg on a step, other foot hanging. Let the free hip drop, then lift it above level using the standing hip. Standing knee stays straight.'],
+  step_down: ['Eccentric step-down', '3 × 8–10', 'Stand on the sore leg on a 10–20 cm step. Lower the other heel to tap the floor over 3 s. Knee tracks over the second toe, pelvis level.'],
+  foam_roll: ['Foam roll glutes and TFL', '60–90 s each', 'Roll the outer hip and side of the glute. Skip rolling the IT band itself: it barely stretches, and pressure on the sore spot can irritate it.'],
+  spanish_squat: ['Spanish squat hold', '5 × 30–45 s', 'Heavy band looped behind both knees and anchored to a post. Sit back to 60–70° of knee bend with shins vertical. Should ease pain, not raise it. Good before runs.'],
+  quad_set: ['Quad sets', '3 × 10, 5 s hold', 'Sitting with the leg straight, tighten the thigh to press the back of the knee down. Useful while the knee is swollen.'],
+  tke: ['Terminal knee extension', '3 × 15', 'Band behind the knee anchored in front. From a slight bend, straighten the knee fully against the band and squeeze the quad.'],
+  mini_squat: ['Mini squat (0–60°)', '3 × 12', 'Feet hip-width, sit back to a quarter squat only. Stay in the pain-free range and progress depth slowly.'],
+  step_up: ['Step-up', '3 × 10 each', 'Sore foot on a 20–30 cm step, drive up without pushing off the back foot, lower slowly.'],
+  sl_balance: ['Single-leg balance', '3 × 30–45 s', 'Soft knee. Progress to eyes closed, a cushion, or small reaches with the other foot.'],
+  bike: ['Easy cycling', '15–30 min', 'Low resistance, saddle high enough that the knee is only slightly bent at the bottom. Keeps fitness while running is reduced.'],
+  tib_ir: ['Resisted shin internal rotation', '3 × 12', 'Sit with the knee bent 90°, band around the forefoot pulling outward. Turn the foot inward by rotating the shin, not just the ankle. Slow return.'],
+  sl_rdl: ['Single-leg Romanian deadlift', '3 × 8 each', 'Soft standing knee, hinge at the hip with a long back, free leg reaching behind. Add a kettlebell when steady.'],
+  ham_iso: ['Hamstring bridge hold', '4 × 30 s', 'Heels on a chair, knees slightly bent. Lift the hips and hold. Progress to one leg. Isometrics often settle tendon pain.'],
+  ham_slider: ['Hamstring slider curl', '3 × 8', 'Bridge up with heels on sliders or a towel, slowly slide the heels out, then curl them back in.'],
+  nordic: ['Nordic hamstring lowers', '2–3 × 4–6', 'Later stage only. Kneel with ankles held, lower the body forward as slowly as you can, catch with your hands.'],
+  calf_raise: ['Bent-knee calf raise', '3 × 15 each', 'Single leg, knee bent about 30° to work the soleus. 2 s up, 3 s down, full range.'],
+  calf_raise_st: ['Straight-knee calf raise', '3 × 12 each', 'Single leg on a step edge, knee straight. Rise high, lower the heel below the step over 3 s.'],
+  ankle_mob: ['Knee-to-wall ankle mobility', '2 × 10', 'Foot a few cm from the wall, drive the knee forward to touch it without lifting the heel. Compare both sides.'],
+  nerve_glide: ['Fibular nerve slider', '2 × 10, gentle', 'Sitting: point the foot down and turn it in while looking up, then pull the foot up while looking down. Smooth and easy, never into strong tingling.'],
+  decline_squat: ['Decline single-leg squat', '3 × 15, slow', 'On a 25° slant board, squat on one leg to about 60°, 3 s down. Mild discomfort is fine if it settles.'],
+  split_squat: ['Split squat', '3 × 8–10', 'Long stance, lower the back knee toward the floor, front shin near vertical. Add dumbbells over time.'],
+  band_march: ['Banded knee drive', '3 × 10 each', 'Band around the foot anchored low behind you. Stand tall and drive the knee up to hip height, control back down.'],
+  heel_slide: ['Heel slides', '2 × 15', 'Lying on your back, slide the heel toward your bottom as far as comfortable, then straighten. Keeps range while the knee is puffy.'],
+};
+
+const CONDS = [
+  { id: 'itbs', name: 'IT band syndrome (ITBS)',
+    zones: { itb_distal: 1, itb_thigh: .65, gerdy: .7, lat_jl: .35, vl: .3, lat_patella: .2 },
+    phases: { contact: 1, loading: .8, propulsion: .2 },
+    feats: { downhill: 3, after_distance: 3, stairs_down: 1.5, sharp: 1.5, burning: 1, tender: 1, gradual: 1, swelling: -2, locking: -3, giving_way: -1, twisting: -1, sudden: -2, sitting: -.5, rest_pain: -1.5, tingling: -1.5 },
+    about: 'The iliotibial band is a thick strip of tissue down the outside of the thigh. Around 20–30° of knee bend, just after foot strike, it compresses the sensitive fat pad over the outer bump of the thigh bone (lateral femoral epicondyle). Thousands of repetitions in a marathon irritate that spot. Classic pattern: fine early in the run, then a sharp outer-knee pain at a predictable distance that can force you to walk, easing soon after you stop. Weak hip abductors and high mileage are the usual drivers.',
+    checks: [
+      'Press the bony bump on the outside of the knee, about 2–3 cm above the joint line. Is it the sore spot?',
+      'Noble test: lie on your back with the knee bent 90°, keep pressing that spot and slowly straighten the knee. Pain near 30° of bend points to ITBS.',
+      'Single-leg squat in a mirror: watch for the knee drifting inward or the opposite hip dropping.',
+    ],
+    ex: ['side_hip_abd', 'hip_hike', 'sl_bridge', 'side_plank', 'step_down', 'foam_roll'],
+    run: 'Cut downhill running and long runs first. Run on flat ground, avoid always running on the same side of a cambered road, and try a 5–10% higher cadence. Most cases settle in 4–8 weeks of modified running plus hip strength work.' },
+
+  { id: 'lat_men', name: 'Lateral meniscus irritation or tear',
+    zones: { lat_jl: 1, post_lat: .5, lcl: .4, itb_distal: .2, gerdy: .2 },
+    phases: { loading: 1, contact: .6, propulsion: .4 },
+    feats: { swelling: 2.5, clicking: 2, locking: 3, giving_way: 1.5, twisting: 2.5, squat: 2, sudden: 1.5, tender: 1, stairs_down: .5, after_distance: -1, tingling: -2, burning: -1 },
+    about: 'The meniscus is a C-shaped cartilage cushion between the thigh and shin bones. The outer one can be irritated by repetitive loading or torn by a twist under load. Pain sits right on the joint line, often with swelling the next day, catching or clicking, and pain at the bottom of a deep squat.',
+    checks: [
+      'Bend the knee to 90° and press along the gap between the thigh and shin bones on the outside. Pain right on the gap points to the meniscus. Pain 2–3 cm above it points more to the IT band.',
+      'Compare both knees the morning after a run. Is the right one puffier?',
+      'A knee that truly locks (you cannot fully straighten it) needs a clinician to look at it soon.',
+    ],
+    ex: ['quad_set', 'tke', 'mini_squat', 'step_up', 'sl_balance', 'bike'],
+    run: 'Avoid deep squats, pivoting and hills while it is irritable. Return with short, flat runs on alternate days once walking, stairs and a mini squat are pain-free. Persistent swelling or catching usually warrants an exam and possibly an MRI.' },
+
+  { id: 'popliteus', name: 'Popliteus tendinopathy',
+    zones: { post_lat: 1, popliteus: 1, lat_jl: .5, lcl: .45, fossa: .35 },
+    phases: { contact: .9, loading: 1 },
+    feats: { downhill: 3, stairs_down: 1.5, after_distance: 1, tender: 1, gradual: .5, ache: .5, swelling: -1, locking: -2, sudden: -.5, tingling: -1.5 },
+    about: 'Popliteus is a small muscle behind the outer knee. Its tendon wraps around the outside of the joint just behind the LCL. It stops the thigh sliding forward on the shin as you land, so long downhill stretches and banked roads overload it. Pain sits at the back-outer corner and is often mistaken for ITBS.',
+    checks: [
+      'Sit with the sore leg in a figure-4 (ankle resting on the other knee). Feel just behind and below the tight LCL cord on the outside. A tender tendon here fits popliteus.',
+      'Sitting with the knee bent 90°, turn your foot and shin inward against your hand. Pain at the back-outer corner fits popliteus.',
+    ],
+    ex: ['tib_ir', 'step_down', 'ham_iso', 'sl_rdl', 'sl_balance'],
+    run: 'Avoid steep downhills and cambered roads for 2–4 weeks. Shorter strides and a slightly higher cadence reduce braking load going downhill.' },
+
+  { id: 'biceps', name: 'Outer hamstring (biceps femoris) tendinopathy',
+    zones: { biceps: 1, fib_head: .6, post_lat: .5 },
+    phases: { late_swing: 1, mid_swing: .5, contact: .4, early_swing: .3 },
+    feats: { fast_pace: 2.5, uphill: 1, tight: 1.5, ache: 1, sitting: .5, gradual: .5, tender: .5, swelling: -1, locking: -2, clicking: -1, stairs_down: -.5 },
+    about: 'The outer hamstring tendon runs down the back-outer thigh to the head of the fibula. It works hardest in late swing, braking the lower leg just before foot strike, so faster running, strides and hills tend to provoke it. It also helps bend the knee as the leg comes through.',
+    checks: [
+      'Lying face down, bend the knee against resistance from a band or a partner. Pain at the back-outer knee fits the hamstring tendon.',
+      'Follow the cord at the back-outer knee down to the bony knob below the joint (the fibular head). Is the cord tender?',
+    ],
+    ex: ['ham_iso', 'sl_rdl', 'ham_slider', 'sl_bridge', 'nordic'],
+    run: 'Drop speed work and hills first. Easy flat running is usually tolerated. Bring back strides last.' },
+
+  { id: 'lcl', name: 'Lateral collateral ligament (LCL) sprain',
+    zones: { lcl: 1, lat_jl: .5, fib_head: .5, itb_distal: .3 },
+    phases: { loading: .7, contact: .5 },
+    feats: { sudden: 2.5, twisting: 1, giving_way: 1, tender: 1.5, swelling: .5, after_distance: -1.5, gradual: -1, tingling: -1 },
+    about: 'The LCL is a pencil-thick ligament from the outer thigh bone to the fibular head. It is usually sprained by a force that bends the knee outward, like a misstep off a curb, a stumble in a crowd or a slip at a water station. Pain from steady running alone is less typical.',
+    checks: [
+      'In a figure-4 sitting position the LCL stands out as a firm cord on the outer knee. Is that cord the sore spot?',
+      'Did the pain start with a specific misstep or stumble?',
+    ],
+    ex: ['tke', 'side_hip_abd', 'mini_squat', 'sl_balance', 'bike'],
+    run: 'Mild sprains often allow easy running in 1–3 weeks. Any sense of the knee shifting or giving way should be examined first.' },
+
+  { id: 'tibfib', name: 'Upper tibiofibular joint irritation',
+    zones: { fib_head: 1, below_fib: .5, biceps: .3, gerdy: .2 },
+    phases: { propulsion: .6, loading: .6 },
+    feats: { ache: 1, tender: 1, twisting: 1, uphill: .5, clicking: .5, gradual: .3, swelling: -.5, locking: -1 },
+    about: 'Just below the outer knee, the top of the fibula joins the shin bone in a small joint that moves a little every time the ankle bends. Stiff ankles, tight calves or a pulling outer hamstring can irritate it, giving a local ache over the bony knob below the outer joint line.',
+    checks: [
+      'Press the bony knob below the outer knee (fibular head) and compare with the left side.',
+      'Knee-to-wall test: if the right ankle bends clearly less than the left, ankle stiffness may be loading this joint.',
+    ],
+    ex: ['calf_raise', 'ankle_mob', 'sl_balance', 'ham_iso', 'side_hip_abd'],
+    run: 'Usually tolerates easy running. Work on ankle mobility and calf strength alongside.' },
+
+  { id: 'nerve', name: 'Common fibular (peroneal) nerve irritation',
+    zones: { below_fib: 1, fib_head: .75, biceps: .3 },
+    phases: {},
+    feats: { tingling: 4, burning: 2, sitting: 1, rest_pain: .5, sharp: .5, swelling: -.5, locking: -2, clicking: -1 },
+    about: 'The common fibular nerve wraps around the neck of the fibula just below the outer knee, close to the skin. Pressure from crossed legs, tight compression sleeves or straps, or traction can irritate it. It feels like burning, tingling or numbness spreading down the outer shin to the top of the foot, rather than a deep joint ache.',
+    checks: [
+      'Tap gently just below the fibular head. Tingling shooting down the shin fits nerve irritation.',
+      'Walk on your heels. If the right foot slaps or you cannot lift the toes, see a doctor promptly.',
+    ],
+    ex: ['nerve_glide', 'calf_raise', 'ankle_mob', 'side_hip_abd'],
+    run: 'Remove pressure first: no leg crossing, and check sleeves, straps and tight tights. Nerve symptoms that spread or come with weakness need a medical review.' },
+
+  { id: 'vl', name: 'Outer quad (vastus lateralis) or quad tendon overload',
+    zones: { vl: 1, quad_tendon: .9, itb_thigh: .45, lat_patella: .3, vmo: .2 },
+    phases: { loading: .8, early_swing: .6, mid_swing: .6, propulsion: .5 },
+    feats: { fast_pace: 1.5, uphill: 1.5, tight: 1.5, squat: 1, sudden: .5, tender: 1, stairs_up: .5, swelling: -.5, locking: -2, tingling: -1.5 },
+    about: 'The outer quad muscle and the quad tendon above the kneecap absorb load as you land and help drive the leg forward through swing. After a marathon they are often simply overworked. Pain sits higher, on the outer front of the thigh just above the knee, and feels tight or bruised rather than sharp at one bony point.',
+    checks: [
+      'Squeeze the outer thigh muscle 5–10 cm above the knee. Muscle tenderness fits a strain or overload.',
+      'Do a slow lunge. A pulling feeling in the outer front thigh fits the quad.',
+    ],
+    ex: ['spanish_squat', 'split_squat', 'step_up', 'band_march'],
+    run: 'Post-marathon overload here usually settles in 1–2 weeks. Ease back with flat, easy runs and delay hills and speed.' },
+
+  { id: 'pfps', name: "Patellofemoral pain (runner's knee)",
+    zones: { patella: 1, lat_patella: 1, med_patella: .9, quad_tendon: .3, pat_tendon: .3 },
+    phases: { loading: 1, contact: .6 },
+    feats: { stairs_down: 2, sitting: 2.5, squat: 2, downhill: 1.5, stairs_up: 1, ache: 1.5, clicking: .3, gradual: .5, swelling: -.5, locking: -1.5, tingling: -1.5 },
+    about: "Pain around or behind the kneecap from overload of the joint between the kneecap and thigh bone. It often shows up on the outer edge of the kneecap. Typical triggers are stairs, downhill, squatting and sitting with bent knees (\"moviegoer's knee\").",
+    checks: [
+      'Sit for 20 minutes with knees bent, then stand up. Achy around the kneecap?',
+      'Step down slowly from a stair on the right leg. Pain at the front of the knee fits patellofemoral pain.',
+    ],
+    ex: ['spanish_squat', 'step_down', 'side_hip_abd', 'clamshell', 'tke'],
+    run: 'Reduce downhill and total volume and raise cadence 5–10%. Isometric holds before runs often reduce pain within days.' },
+
+  { id: 'patellar', name: 'Patellar tendinopathy',
+    zones: { pat_tendon: 1, patella: .3, gerdy: .15 },
+    phases: { loading: 1, propulsion: .5 },
+    feats: { squat: 1.5, uphill: 1, fast_pace: 1.5, stairs_up: 1, morning_stiff: 1.5, tender: 1, gradual: .5, swelling: -.5, locking: -2 },
+    about: 'Overload of the tendon joining the kneecap to the shin, felt just below the kneecap. Often stiff and sore at the start of a run, easing when warm, then worse the next morning. More common with jumping, hills and speed than with steady marathon pace.',
+    checks: [
+      'Press the tendon just below the tip of the kneecap and compare sides.',
+      'A slow single-leg squat on a downward slope reproduces pain right below the kneecap.',
+    ],
+    ex: ['spanish_squat', 'split_squat', 'decline_squat', 'step_up'],
+    run: 'Keep easy running if pain stays at or below 3/10 and settles by the next morning. Pause hills and intervals. Tendons respond to steady, heavy, slow loading over 8–12 weeks.' },
+
+  { id: 'med', name: 'Medial meniscus or MCL irritation',
+    zones: { med_jl: 1, mcl: 1, med_epi: .6, pes: .3 },
+    phases: { loading: 1, contact: .6 },
+    feats: { swelling: 2, clicking: 1.5, locking: 2.5, twisting: 2.5, squat: 1.5, sudden: 1.5, giving_way: 1, tender: 1, after_distance: -1, tingling: -2 },
+    about: 'On the inner side of the knee, the medial meniscus and the medial collateral ligament share territory. A twist, or the knee being pushed inward under load, is a common cause. Pain sits on the inner joint line, sometimes with swelling and catching.',
+    checks: [
+      'Press along the inner joint line with the knee bent 90°. Pinpoint pain on the gap fits the meniscus; pain along a band above and below fits the MCL.',
+      'Any locking, or swelling within hours of an injury, should be examined.',
+    ],
+    ex: ['quad_set', 'tke', 'mini_squat', 'side_hip_abd', 'bike'],
+    run: 'Avoid pivoting and deep squats. Return on flat ground once walking and stairs are pain-free.' },
+
+  { id: 'pes', name: 'Pes anserine bursitis or tendinopathy',
+    zones: { pes: 1, med_jl: .3, mcl: .3, med_ham: .3 },
+    phases: { loading: .5 },
+    feats: { stairs_up: 1, stairs_down: .5, sitting: .5, tender: 1.5, gradual: 1, ache: 1, rest_pain: .5, swelling: .3, locking: -2, clicking: -1 },
+    about: 'Three tendons from the inner thigh attach to the inner shin about 5 cm below the joint line, with a small bursa underneath. Overload gives a tender, achy spot there, often worse on stairs and at night lying with the knees together.',
+    checks: ['Press the inner shin a hand-width below the joint line. A tender patch that matches your pain fits pes anserine.'],
+    ex: ['side_hip_abd', 'clamshell', 'ham_iso', 'sl_bridge', 'step_up'],
+    run: 'Usually tolerates easy flat running. A pillow between the knees at night helps.' },
+
+  { id: 'baker', name: "Baker's cyst (back-of-knee swelling)",
+    zones: { fossa: 1, gastroc_m: .4, popliteus: .3 },
+    phases: {},
+    feats: { swelling: 2, tight: 2, squat: 1.5, morning_stiff: 1, ache: .5, clicking: .3 },
+    about: 'Fluid from the knee joint can collect in a pouch behind the knee, giving a tight fullness that limits full bending. It usually points to something irritating the joint, often the meniscus, rather than being the root problem. Sudden calf swelling, warmth or redness needs urgent medical review to rule out a blood clot.',
+    checks: ['Compare the backs of both knees standing with legs straight. A soft, rounded fullness on the right fits a cyst.'],
+    ex: ['heel_slide', 'quad_set', 'bike', 'calf_raise'],
+    run: 'Let the joint settle first. The cyst usually shrinks once the underlying irritation is treated.' },
+
+  { id: 'gastroc', name: 'Upper calf (gastrocnemius) strain',
+    zones: { gastroc_l: 1, gastroc_m: 1, fossa: .3, below_fib: .2 },
+    phases: { propulsion: 1, loading: .5 },
+    feats: { uphill: 2, fast_pace: 1.5, sudden: 1.5, tight: 1.5, tender: 1, locking: -2, clicking: -1 },
+    about: 'The calf muscle starts just above the back of the knee. A strain near its upper end feels like a pull or a kick at the top of the calf, often during push-off, uphill or when picking up the pace.',
+    checks: ['Rise up on the toes of the right leg only. Pain at the top of the calf fits a calf strain.'],
+    ex: ['calf_raise_st', 'calf_raise', 'ankle_mob', 'sl_balance'],
+    run: 'Hold running until walking briskly and 15 single-leg calf raises are comfortable, then rebuild on the flat.' },
+];
+
+/* ---------------- State ---------------- */
+const KEY = 'runner-knee-map-v1';
+const DEFAULT = { pins: [{ view: 'lateral', x: 170, y: 200, starter: true }], phases: [], feats: [], km: 25, view: 'lateral', showZones: false };
+let state;
+try { state = { ...DEFAULT, ...(JSON.parse(localStorage.getItem(KEY)) || {}) }; } catch (e) { state = { ...DEFAULT }; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ---------------- Runner animation ---------------- */
+const HIP  = [[0, 25], [.15, 10], [.40, -18], [.55, 4], [.78, 38], [.9, 31], [1, 25]];
+const KNEE = [[0, 12], [.15, 40], [.40, 14], [.55, 78], [.68, 108], [.82, 72], [.94, 18], [1, 12]];
+const FOOT = [[0, -10], [.15, 0], [.30, 16], [.40, 42], [.55, 34], [.75, 12], [.9, -6], [1, -10]];
+const interp = (keys, t) => {
+  for (let i = 0; i < keys.length - 1; i++) {
+    const [t0, v0] = keys[i], [t1, v1] = keys[i + 1];
+    if (t >= t0 && t <= t1) { const u = (t - t0) / (t1 - t0); return v0 + (v1 - v0) * (1 - Math.cos(Math.PI * u)) / 2; }
+  }
+  return keys[0][1];
+};
+const R = Math.PI / 180;
+const L1 = 62, L2 = 60, FL = 24, TORSO = 66, LEAN = 9 * R;
+
+function leg(phase) {
+  const h = interp(HIP, phase) * R, k = interp(KNEE, phase) * R, g = interp(FOOT, phase) * R;
+  const knee = { x: Math.sin(h) * L1, y: Math.cos(h) * L1 };
+  const a2 = h - k;
+  const ankle = { x: knee.x + Math.sin(a2) * L2, y: knee.y + Math.cos(a2) * L2 };
+  const fv = { x: Math.cos(g), y: Math.sin(g) };
+  const heel = { x: ankle.x - fv.x * FL * .3, y: ankle.y - fv.y * FL * .3 + 4 };
+  const toe = { x: ankle.x + fv.x * FL * .85, y: ankle.y + fv.y * FL * .85 + 4 };
+  return { knee, ankle, heel, toe, low: Math.max(ankle.y + 4, heel.y, toe.y), hip: h };
+}
+function hipLift(t) {
+  const r = t, l = (t + .5) % 1;
+  if (r < .4) return leg(r).low;
+  if (l < .4) return leg(l).low;
+  const u = r < .5 ? (r - .4) / .1 : (r - .9) / .1;
+  const y0 = leg(.4).low, y1 = leg(0).low;
+  return y0 + (y1 - y0) * u + 9 * Math.sin(Math.PI * u);
+}
+
+const cv = $('runner'), ctx = cv.getContext('2d');
+let W = 0, H = 0, DPR = 1, t = 0, playing = true, last = 0, lastPhase = null, colors = {}, scroll = 0, kneeScreen = { x: 0, y: 0 };
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduced) { playing = false; t = .1; }
+
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  ['--ink', '--far', '--accent', '--pain', '--track', '--line', '--muted', '--surface'].forEach(k => colors[k] = cs.getPropertyValue(k).trim());
+}
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  readColors(); draw();
+}
+new ResizeObserver(resize).observe(cv);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+new MutationObserver(() => { readColors(); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+const phaseAt = p => PHASES.find(ph => p >= ph.a && p < ph.b) || PHASES[PHASES.length - 1];
+
+function seg(x1, y1, x2, y2, w, c) { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+
+function draw() {
+  if (!W) return;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  const s = H / 262, ground = H - 26;
+  const hx = W * .46, hy = ground - hipLift(t) * s;
+  // track
+  ctx.fillStyle = colors['--track']; ctx.fillRect(0, ground, W, H - ground);
+  ctx.strokeStyle = colors['--line']; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, ground + .5); ctx.lineTo(W, ground + .5); ctx.stroke();
+  ctx.fillStyle = colors['--far'];
+  const gap = 46 * s;
+  for (let x = -(scroll % gap); x < W; x += gap) ctx.fillRect(x, ground + 11 * s, 18 * s, 2);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  const P = (o, p) => ({ x: hx + p.x * s, y: hy + p.y * s });
+  const drawLeg = (ph, col, wt) => {
+    const lg = leg(ph), k = P(0, lg.knee), a = P(0, lg.ankle), he = P(0, lg.heel), to = P(0, lg.toe);
+    seg(hx, hy, k.x, k.y, 15 * s * wt, col); seg(k.x, k.y, a.x, a.y, 12 * s * wt, col);
+    seg(he.x, he.y, to.x, to.y, 8 * s * wt, col); seg(a.x, a.y, he.x, he.y, 8 * s * wt, col);
+    return k;
+  };
+  const sh = { x: hx + Math.sin(LEAN) * TORSO * s, y: hy - Math.cos(LEAN) * TORSO * s };
+  const drawArm = (hipAngle, col) => {
+    const a = -hipAngle * .9 - .05;
+    const e = { x: sh.x + Math.sin(a) * 34 * s, y: sh.y + 4 * s + Math.cos(a) * 34 * s };
+    const f = a + 95 * R;
+    const w = { x: e.x + Math.sin(f) * 30 * s, y: e.y + Math.cos(f) * 30 * s };
+    seg(sh.x, sh.y + 4 * s, e.x, e.y, 9 * s, col); seg(e.x, e.y, w.x, w.y, 8 * s, col);
+  };
+  const tl = (t + .5) % 1;
+  drawArm(leg(t).hip, colors['--far']);           // left arm (far) swings with right leg
+  drawLeg(tl, colors['--far'], .95);              // left leg (far)
+  seg(hx, hy, sh.x, sh.y, 20 * s, colors['--ink']); // torso
+  const head = { x: sh.x + Math.sin(LEAN) * 24 * s, y: sh.y - Math.cos(LEAN) * 24 * s };
+  ctx.fillStyle = colors['--ink']; ctx.beginPath(); ctx.arc(head.x, head.y, 12 * s, 0, Math.PI * 2); ctx.fill();
+  const k = drawLeg(t, colors['--accent'], 1);    // right leg (near)
+  drawArm(leg(tl).hip, colors['--ink']);          // right arm (near)
+  kneeScreen = k;
+
+  // knee marker
+  const ph = phaseAt(t), hurts = state.phases.includes(ph.id);
+  const pulse = reduced ? .5 : (Math.sin(performance.now() / 260) + 1) / 2;
+  ctx.fillStyle = colors['--pain'];
+  ctx.globalAlpha = hurts ? .35 : .18; ctx.beginPath(); ctx.arc(k.x, k.y, (hurts ? 20 : 13 + pulse * 5) * s, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(k.x, k.y, 5 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.font = `500 ${Math.max(10, 11 * s)}px "IBM Plex Mono", monospace`; ctx.fillStyle = colors['--muted'];
+  ctx.fillText('RIGHT KNEE', Math.min(k.x + 16 * s, W - 84), k.y + 4);
+}
+
+function frame(now) {
+  const dt = last ? Math.min(.05, (now - last) / 1000) : 0; last = now;
+  if (playing) { t = (t + dt / 2.1) % 1; scroll += dt * 150 * (H / 262); $('scrub').value = Math.round(t * 999); }
+  draw(); updatePhaseUI();
+  requestAnimationFrame(frame);
+}
+
+function updatePhaseUI(force) {
+  const ph = phaseAt(t);
+  if (!force && ph.id === lastPhase) return;
+  lastPhase = ph.id;
+  const now = $('phaseNow'), hurts = state.phases.includes(ph.id);
+  now.textContent = ph.label; now.classList.toggle('hurts', hurts);
+  document.querySelectorAll('.phase-seg').forEach(b => b.classList.toggle('current', b.dataset.id === ph.id));
+  const hb = $('hurtBtn');
+  hb.textContent = hurts ? `Marked: ${ph.short.toLowerCase()} ✓` : 'It hurts here';
+  hb.classList.toggle('on', hurts);
+}
+
+function renderPhases() {
+  $('phases').innerHTML = PHASES.map(p => `<button type="button" class="phase-seg${state.phases.includes(p.id) ? ' marked' : ''}" data-id="${p.id}" style="--w:${(p.b - p.a) * 100}" title="${esc(p.label)}">${esc(p.short)}</button>`).join('');
+  updatePhaseUI(true);
+}
+$('phases').addEventListener('click', e => {
+  const b = e.target.closest('.phase-seg'); if (!b) return;
+  const p = PHASES.find(x => x.id === b.dataset.id);
+  setPlaying(false); t = (p.a + p.b) / 2; $('scrub').value = Math.round(t * 999); updatePhaseUI(true);
+});
+$('scrub').addEventListener('input', e => { setPlaying(false); t = e.target.value / 999; updatePhaseUI(true); });
+function setPlaying(v) { playing = v; $('playBtn').textContent = v ? 'Pause' : 'Play'; }
+$('playBtn').addEventListener('click', () => setPlaying(!playing));
+$('hurtBtn').addEventListener('click', () => {
+  const id = phaseAt(t).id;
+  state.phases = state.phases.includes(id) ? state.phases.filter(x => x !== id) : [...state.phases, id];
+  save(); renderPhases(); renderResults();
+});
+cv.addEventListener('click', e => {
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (Math.hypot(x - kneeScreen.x, y - kneeScreen.y) < 34) {
+    state.view = 'lateral'; save(); renderKnee();
+    $('kneeCard').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    const box = $('kneeBox'); box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash');
+  } else setPlaying(!playing);
+});
+
+/* ---------------- Knee diagram ---------------- */
+const LAT_BASE = `
+  <path class="skin" d="M70,0 C78,80 86,150 90,195 C92,215 88,235 82,255 C70,290 70,330 84,370 C92,395 100,410 104,420 L204,420 C206,370 214,310 222,268 C226,256 230,250 228,240 C238,232 244,212 240,192 C236,176 228,165 226,150 C224,100 226,50 228,0 Z"/>
+  <path class="bone" d="M132,0 L132,140 C118,160 108,186 114,204 C120,214 150,214 170,212 C192,214 214,210 218,196 C222,178 204,154 192,140 L192,0 Z"/>
+  <path class="bone" d="M112,224 C140,218 196,218 216,224 C224,236 220,252 208,262 L196,420 L150,420 L144,262 C128,252 112,238 112,224 Z"/>
+  <ellipse class="bone" cx="228" cy="198" rx="10" ry="24"/>
+  <path class="tendon-fill" d="M222,222 L232,224 L222,264 L212,262 Z"/>
+  <line class="joint" x1="96" y1="217" x2="234" y2="217"/>`;
+const SVG = {
+  lateral: () => `${LAT_BASE}
+    <path class="bone" d="M116,258 L128,258 L126,420 L118,420 Z"/>
+    <circle class="bone" cx="122" cy="252" r="10"/>
+    <path class="band" d="M150,0 L184,0 C192,100 206,180 214,240 L198,244 C184,180 162,100 150,0 Z"/>
+    <circle class="bone" cx="163" cy="188" r="6"/>
+    <path class="tendon" d="M90,100 C102,170 112,215 118,244"/>
+    <path class="lig" d="M162,190 L124,246"/>
+    <path class="tendon thin" d="M156,212 C140,222 124,226 106,232"/>
+    <text class="orient" x="8" y="412">BACK</text><text class="orient" x="292" y="412" text-anchor="end">FRONT</text>
+    <text class="orient" x="8" y="14">OUTSIDE OF RIGHT KNEE</text>`,
+  medial: () => `<g transform="translate(300,0) scale(-1,1)">${LAT_BASE}
+      <path class="muscle" d="M190,60 C212,100 226,150 222,182 C206,178 196,150 186,120 Z"/>
+      <circle class="bone" cx="162" cy="186" r="6"/>
+      <path class="lig" d="M162,188 C166,220 168,260 172,292" style="stroke-width:9; opacity:.55"/>
+      <path class="tendon thin" d="M96,110 C110,200 140,262 190,280"/>
+      <path class="tendon thin" d="M104,108 C118,200 146,258 192,272"/>
+    </g>
+    <text class="orient" x="8" y="412">FRONT</text><text class="orient" x="292" y="412" text-anchor="end">BACK</text>
+    <text class="orient" x="8" y="14">INSIDE OF RIGHT KNEE</text>`,
+  front: () => `
+    <path class="skin" d="M72,0 C78,90 92,150 96,198 C98,222 96,242 102,262 C108,320 114,380 118,420 L182,420 C186,380 192,320 198,262 C204,242 202,222 204,198 C208,150 222,90 228,0 Z"/>
+    <path class="bone" d="M122,0 L122,150 C108,170 100,196 106,214 C120,222 140,220 150,216 C160,220 180,222 194,214 C200,196 192,170 178,150 L178,0 Z"/>
+    <circle class="bone" cx="104" cy="262" r="8"/><path class="bone" d="M100,268 L108,268 L110,420 L104,420 Z"/>
+    <path class="bone" d="M104,232 C130,226 170,226 196,232 C200,246 190,258 176,264 L168,420 L136,420 L128,264 C112,258 102,246 104,232 Z"/>
+    <path class="band" d="M78,0 L98,0 C104,120 112,200 122,250 L112,256 C100,200 88,120 78,0 Z"/>
+    <path class="muscle" d="M180,110 C204,130 210,170 196,190 C184,184 176,160 172,130 Z"/>
+    <path class="tendon-fill" d="M140,140 L160,140 L164,170 L136,170 Z"/>
+    <ellipse class="bone" cx="150" cy="192" rx="22" ry="27"/>
+    <path class="tendon-fill" d="M141,218 L159,218 L157,266 L143,266 Z"/>
+    <line class="joint" x1="98" y1="229" x2="202" y2="229"/>
+    <text class="orient" x="8" y="14">FRONT OF RIGHT KNEE</text>
+    <text class="orient" x="8" y="412">OUTSIDE</text><text class="orient" x="292" y="412" text-anchor="end">INSIDE</text>`,
+  back: () => `
+    <path class="skin" d="M72,0 C78,90 92,150 96,198 C98,222 96,242 102,262 C108,320 114,380 118,420 L182,420 C186,380 192,320 198,262 C204,242 202,222 204,198 C208,150 222,90 228,0 Z"/>
+    <path class="bone" d="M122,0 L122,150 C108,170 100,196 106,214 C120,222 140,220 150,216 C160,220 180,222 194,214 C200,196 192,170 178,150 L178,0 Z" style="opacity:.6"/>
+    <path class="muscle" d="M118,222 C98,262 104,330 148,372 C150,330 150,270 146,226 Z"/>
+    <path class="muscle" d="M182,222 C202,262 196,330 152,372 C150,330 150,270 154,226 Z"/>
+    <circle class="bone" cx="202" cy="262" r="8"/>
+    <path class="tendon" d="M196,80 C204,150 206,215 202,256"/>
+    <path class="tendon thin" d="M106,80 C98,150 98,220 108,262"/>
+    <path class="tendon thin" d="M116,84 C108,150 108,215 116,258"/>
+    <path class="tendon thin" d="M188,236 L124,272"/>
+    <path class="joint" d="M110,222 Q150,234 190,222"/>
+    <text class="orient" x="8" y="14">BACK OF RIGHT KNEE</text>
+    <text class="orient" x="8" y="412">INSIDE</text><text class="orient" x="292" y="412" text-anchor="end">OUTSIDE</text>`,
+};
+
+function zoneHits(pin) {
+  return ZONES[pin.view].map(z => ({ id: z.id, w: Math.max(0, 1 - Math.hypot(pin.x - z.x, pin.y - z.y) / (z.r * 1.6)) }))
+    .filter(h => h.w > 0).sort((a, b) => b.w - a.w);
+}
+const pinLabel = p => { const h = zoneHits(p)[0]; return h ? ZL[h.id] : 'Outside the mapped areas'; };
+
+function renderKnee() {
+  const svg = $('knee');
+  svg.classList.toggle('show-zones', state.showZones);
+  const zones = ZONES[state.view].map(z => `<circle class="zone" data-z="${z.id}" cx="${z.x}" cy="${z.y}" r="${z.r}"/>`).join('');
+  const pins = state.pins.map((p, i) => p.view !== state.view ? '' :
+    `<circle class="pin-ring" cx="${p.x}" cy="${p.y}" r="12"/><circle class="pin" data-pin="${i}" cx="${p.x}" cy="${p.y}" r="9"><title>Remove pin ${i + 1}</title></circle><text class="pin-n" x="${p.x}" y="${p.y + 3.5}">${i + 1}</text>`).join('');
+  svg.innerHTML = SVG[state.view]() + `<g>${zones}</g><g>${pins}</g>`;
+  $('tabs').innerHTML = VIEWS.map(v => {
+    const n = state.pins.filter(p => p.view === v.id).length;
+    return `<button type="button" role="tab" class="tab" data-v="${v.id}" aria-selected="${v.id === state.view}">${v.label}${n ? `<span class="badge">${n}</span>` : ''}</button>`;
+  }).join('');
+  $('pins').innerHTML = state.pins.map((p, i) => `<li><span class="n">${i + 1}</span><span class="txt">${esc(pinLabel(p))}<small>${VIEW_NAME[p.view]}${p.starter ? ' · starter pin from your description' : ''}</small></span><button type="button" class="x" data-rm="${i}" aria-label="Remove pin ${i + 1}">×</button></li>`).join('');
+  $('starterNote').hidden = !state.pins.some(p => p.starter);
+  $('showZones').checked = state.showZones;
+}
+
+$('tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (!b) return; state.view = b.dataset.v; save(); renderKnee(); });
+$('showZones').addEventListener('change', e => { state.showZones = e.target.checked; save(); renderKnee(); });
+$('pins').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (!b) return; removePin(+b.dataset.rm); });
+function removePin(i) { state.pins.splice(i, 1); save(); renderKnee(); renderResults(); setReadout(); }
+
+function svgPoint(e) {
+  const svg = $('knee'), pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function setReadout(p, verb) {
+  const el = $('readout');
+  if (!p) { el.innerHTML = state.pins.length ? `${state.pins.length} pin${state.pins.length > 1 ? 's' : ''} placed <small>· tap a pin to remove it</small>` : 'Tap the knee to drop a pin'; return; }
+  el.innerHTML = `${esc(pinLabel(p))} <small>· ${verb}</small>`;
+}
+$('knee').addEventListener('click', e => {
+  const pinEl = e.target.closest('[data-pin]');
+  if (pinEl) { removePin(+pinEl.dataset.pin); return; }
+  const p = svgPoint(e);
+  if (p.x < 0 || p.x > 300 || p.y < 0 || p.y > 420) return;
+  if (state.pins.length >= 6) state.pins.shift();
+  const pin = { view: state.view, x: Math.round(p.x), y: Math.round(p.y) };
+  state.pins.push(pin); save(); renderKnee(); renderResults(); setReadout(pin, 'pinned');
+});
+$('knee').addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse') return;
+  const p = svgPoint(e), probe = { view: state.view, x: p.x, y: p.y }, h = zoneHits(probe)[0];
+  document.querySelectorAll('#knee .zone').forEach(z => z.classList.toggle('hot', !!h && z.dataset.z === h.id && h.w > .2));
+  setReadout(probe, 'tap to pin');
+});
+$('knee').addEventListener('pointerleave', () => { document.querySelectorAll('#knee .zone.hot').forEach(z => z.classList.remove('hot')); setReadout(); });
+
+/* ---------------- Symptoms ---------------- */
+function renderFeats() {
+  $('feats').innerHTML = FEATS.map((g, gi) => `<fieldset><legend>${esc(g.group)}</legend><div class="chips">${
+    g.items.map(([id, label]) => `<button type="button" class="chip" data-f="${id}" data-g="${gi}" aria-pressed="${state.feats.includes(id)}">${esc(label)}</button>`).join('')
+  }</div>${gi === 1 ? `<div class="km" id="kmBox" ${state.feats.includes('after_distance') ? '' : 'hidden'}>
+      <label for="km" class="hint">In Berlin, the pain started around</label>
+      <span class="km-val mono" id="kmVal">km ${state.km}</span>
+      <input type="range" id="km" min="0" max="42" step="1" value="${state.km}">
+      <div class="km-marks"><span>START</span><span>HALF 21.1</span><span>FINISH 42.2</span></div>
+    </div>` : ''}</fieldset>`).join('');
+}
+$('feats').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  const id = b.dataset.f, g = FEATS[+b.dataset.g];
+  if (state.feats.includes(id)) state.feats = state.feats.filter(f => f !== id);
+  else {
+    if (g.radio) state.feats = state.feats.filter(f => !g.items.some(([x]) => x === f));
+    state.feats.push(id);
+  }
+  save(); renderFeats(); renderResults();
+});
+$('feats').addEventListener('input', e => {
+  if (e.target.id !== 'km') return;
+  state.km = +e.target.value; $('kmVal').textContent = `km ${state.km}`; save();
+});
+
+/* ---------------- Matching ---------------- */
+function score(c) {
+  let loc = 0, locZone = null;
+  state.pins.forEach(p => zoneHits(p).forEach(h => { const v = h.w * (c.zones[h.id] || 0); if (v > loc) { loc = v; locZone = h.id; } }));
+  let s = loc * 10; const why = [];
+  if (loc > .15) why.push({ good: true, t: `location: ${ZL[locZone].split(' (')[0].toLowerCase()}` });
+  if (state.phases.length) {
+    let best = 0, bestId = null;
+    state.phases.forEach(p => { const v = c.phases[p] || 0; if (v > best) { best = v; bestId = p; } });
+    s += best * 2.5;
+    if (best >= .5) why.push({ good: true, t: `hurts at ${PHASES.find(p => p.id === bestId).label.toLowerCase()}` });
+    else if (Object.keys(c.phases).length) { s -= 1; why.push({ good: false, t: 'stride timing is unusual for this' }); }
+  }
+  state.feats.forEach(f => { const w = c.feats[f]; if (!w) return; s += w; why.push({ good: w > 0, t: FEAT_TXT[f] }); });
+  return { c, s, loc, why };
+}
+
+function renderFlags() {
+  const f = state.feats, out = [];
+  if (f.includes('locking')) out.push(['Locking', 'A knee that gets stuck and won\'t fully straighten can mean a displaced meniscus fragment. Get it examined soon.']);
+  if (f.includes('swelling') && f.includes('sudden')) out.push(['Sudden swelling', 'Swelling within hours of a twist or pop suggests an internal injury. See a clinician before running again.']);
+  if (f.includes('giving_way')) out.push(['Giving way', 'Have the ligaments checked before returning to running.']);
+  if (f.includes('rest_pain')) out.push(['Pain at rest or night', 'Pinpoint bone pain that is there at rest can be a bone stress injury after a marathon build. Worth a medical review.']);
+  if (f.includes('tingling')) out.push(['Nerve symptoms', 'Tingling or numbness, especially with a weak or slapping foot, should be checked by a doctor.']);
+  $('flags').innerHTML = out.map(([h, t]) => `<div class="flag"><b>${esc(h)}</b><span>${esc(t)}</span></div>`).join('');
+}
+
+function exCard(id) {
+  const [n, d, how] = EX[id];
+  return `<div class="ex"><b>${esc(n)}</b><span class="dose">${esc(d)}</span><p>${esc(how)}</p></div>`;
+}
+
+let openIds = null;
+function renderResults() {
+  renderFlags();
+  const res = $('results');
+  if (!state.pins.length) {
+    res.innerHTML = `<div class="empty">Drop at least one pin on the knee map to see which conditions fit.</div>`; return;
+  }
+  const scored = CONDS.map(score).filter(r => r.loc > .12).sort((a, b) => b.s - a.s).slice(0, 5);
+  if (!scored.length) { res.innerHTML = `<div class="empty">Your pins sit outside the mapped areas. Try the <b>Show areas</b> toggle and place a pin on the closest one.</div>`; return; }
+  const max = Math.max(16, scored[0].s);
+  if (!openIds) openIds = new Set([scored[0].c.id]);
+  res.innerHTML = scored.map((r, i) => {
+    const fit = r.s >= 12 ? ['strong', 'Strong fit'] : r.s >= 7 ? ['possible', 'Possible'] : ['less', 'Less likely'];
+    const c = r.c;
+    return `<details class="result" data-id="${c.id}" ${openIds.has(c.id) ? 'open' : ''}>
+      <summary>
+        <div class="r-top"><span class="r-name">${esc(c.name)}</span><span class="pill ${fit[0]}">${fit[1]}</span></div>
+        <div class="bar" aria-hidden="true"><i style="width:${Math.max(4, Math.min(100, r.s / max * 100))}%"></i></div>
+        <ul class="why">${r.why.map(w => `<li class="${w.good ? 'good' : 'bad'}">${esc(w.t)}</li>`).join('')}</ul>
+      </summary>
+      <div class="r-body">
+        <div><h4>What it is</h4><p>${esc(c.about)}</p></div>
+        <div><h4>Check it yourself</h4><ul>${c.checks.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        <div><h4>Strength and mobility</h4><div class="ex-grid">${c.ex.map(exCard).join('')}</div></div>
+        <div><h4>Running</h4><p>${esc(c.run)}</p></div>
+      </div>
+    </details>`;
+  }).join('');
+}
+$('results').addEventListener('toggle', e => {
+  const d = e.target.closest('details'); if (!d || !openIds) return;
+  d.open ? openIds.add(d.dataset.id) : openIds.delete(d.dataset.id);
+}, true);
+
+/* ---------------- Summary ---------------- */
+$('copyBtn').addEventListener('click', () => {
+  const lines = ['Right knee pain after the Berlin Marathon', ''];
+  lines.push('Where:');
+  state.pins.forEach((p, i) => lines.push(`  ${i + 1}. ${pinLabel(p)} (${VIEW_NAME[p.view]})`));
+  if (!state.pins.length) lines.push('  (no pins placed)');
+  lines.push('', 'When in the stride: ' + (state.phases.length ? PHASES.filter(p => state.phases.includes(p.id)).map(p => p.label).join(', ') : 'not marked'));
+  const feats = state.feats.map(f => FEAT_TXT[f]);
+  if (state.feats.includes('after_distance')) feats.push(`started around km ${state.km}`);
+  lines.push('Symptoms: ' + (feats.length ? feats.join(', ') : 'none marked'));
+  const top = CONDS.map(score).filter(r => r.loc > .12).sort((a, b) => b.s - a.s).slice(0, 3);
+  if (top.length) lines.push('', 'Self-assessment suggests: ' + top.map(r => r.c.name).join('; '));
+  const text = lines.join('\n');
+  const out = $('copyOut'), wrap = $('copyWrap'), toast = $('copyToast');
+  out.value = text; wrap.hidden = false;
+  const fallback = () => { toast.textContent = 'Select the text below and copy it.'; out.focus(); out.select(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => { toast.textContent = 'Copied to clipboard.'; }, fallback);
+  else fallback();
+});
+
+/* ---------------- Boot ---------------- */
+renderPhases(); renderKnee(); renderFeats(); renderResults(); setReadout(); setPlaying(playing);
+requestAnimationFrame(frame);
+})();
+</script>
